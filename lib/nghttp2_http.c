@@ -114,6 +114,7 @@ static int check_path(nghttp2_stream *stream) {
 
 static int http_request_on_header(nghttp2_stream *stream, nghttp2_hd_nv *nv,
                                   int trailer, int connect_protocol) {
+  fprintf(stderr, "HERE: http_request_on_header with connect_protocol=%d\n", connect_protocol);
   if (nv->name->base[0] == ':') {
     if (trailer ||
         (stream->http_flags & NGHTTP2_HTTP_FLAG_PSEUDO_HEADER_DISALLOWED)) {
@@ -178,6 +179,7 @@ static int http_request_on_header(nghttp2_stream *stream, nghttp2_hd_nv *nv,
     break;
   case NGHTTP2_TOKEN__PROTOCOL:
     if (!connect_protocol) {
+       fprintf(stderr, "HERE: on header connect_protocol=%d\n", connect_protocol);
       return NGHTTP2_ERR_HTTP_HEADER;
     }
 
@@ -266,6 +268,7 @@ static int http_response_on_header(nghttp2_stream *stream, nghttp2_hd_nv *nv,
     if (stream->status_code / 100 == 1 ||
         (stream->status_code == 200 &&
          (stream->http_flags & NGHTTP2_HTTP_FLAG_METH_CONNECT))) {
+       fprintf(stderr, "HERE: FAIL METH connect_protocol?\n" );
       return NGHTTP2_ERR_HTTP_HEADER;
     }
     if (stream->content_length != -1) {
@@ -473,8 +476,10 @@ int nghttp2_http_on_request_headers(nghttp2_stream *stream,
     if ((stream->http_flags &
          (NGHTTP2_HTTP_FLAG__SCHEME | NGHTTP2_HTTP_FLAG__PATH)) ||
         (stream->http_flags & NGHTTP2_HTTP_FLAG__AUTHORITY) == 0) {
+       fprintf(stderr, "HERE: returning on request_headers  connect_protocol=%d\n", connect_protocol);
       return -1;
     }
+       fprintf(stderr, "HERE: on request_headers  connect_protocol=%d\n", connect_protocol);
     stream->content_length = -1;
   } else {
     if ((stream->http_flags & NGHTTP2_HTTP_FLAG_REQ_HEADERS) !=
@@ -486,6 +491,7 @@ int nghttp2_http_on_request_headers(nghttp2_stream *stream,
     if ((stream->http_flags & NGHTTP2_HTTP_FLAG__PROTOCOL) &&
         ((stream->http_flags & NGHTTP2_HTTP_FLAG_METH_CONNECT) == 0 ||
          (stream->http_flags & NGHTTP2_HTTP_FLAG__AUTHORITY) == 0)) {
+       fprintf(stderr, "HERE: on request_headers something connect_protocol=%d\n", connect_protocol);
       return -1;
     }
     if (!check_path(stream)) {
@@ -525,6 +531,7 @@ int nghttp2_http_on_response_headers(nghttp2_stream *stream) {
     stream->content_length = 0;
   } else if (stream->http_flags & (NGHTTP2_HTTP_FLAG_METH_CONNECT |
                                    NGHTTP2_HTTP_FLAG_METH_UPGRADE_WORKAROUND)) {
+       fprintf(stderr, "HERE: FAIL METH2 connect_protocol=\n");
     stream->content_length = -1;
   }
 

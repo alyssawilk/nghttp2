@@ -3746,6 +3746,7 @@ static int session_after_header_block_received(nghttp2_session *session) {
       subject_stream = nghttp2_session_get_stream(
           session, frame->push_promise.promised_stream_id);
       if (subject_stream) {
+        fprintf(stderr, "HERE: on request headers with local=%d\n",  session->local_settings.enable_connect_protocol);
         rv = nghttp2_http_on_request_headers(
             subject_stream, frame,
             session->server && session->local_settings.enable_connect_protocol);
@@ -3754,6 +3755,7 @@ static int session_after_header_block_received(nghttp2_session *session) {
       assert(frame->hd.type == NGHTTP2_HEADERS);
       switch (frame->headers.cat) {
       case NGHTTP2_HCAT_REQUEST:
+        fprintf(stderr, "HERE: on request headers2 with local=%d\n",  session->local_settings.enable_connect_protocol);
         rv = nghttp2_http_on_request_headers(
             stream, frame,
             session->server && session->local_settings.enable_connect_protocol);
@@ -4366,6 +4368,7 @@ int nghttp2_session_update_local_settings(nghttp2_session *session,
       session->local_settings.max_header_list_size = iv[i].value;
       break;
     case NGHTTP2_SETTINGS_ENABLE_CONNECT_PROTOCOL:
+      fprintf(stderr, "HERE: Setting local enable connect to %d\n", iv[i].value);
       session->local_settings.enable_connect_protocol = iv[i].value;
       break;
     }
@@ -4524,6 +4527,7 @@ int nghttp2_session_on_settings_received(nghttp2_session *session,
             "SETTINGS_ENABLE_CONNECT_PROTOCOL");
       }
 
+      fprintf(stderr, "HERE: Setting new remote enable connect to %d\n", entry->value);
       session->remote_settings.enable_connect_protocol = entry->value;
 
       break;
